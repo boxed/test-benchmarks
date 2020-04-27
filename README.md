@@ -5,4 +5,4 @@ A little project to benchmark test runners. Currently only testing pytest and ha
 
 Current results:
 
-![hammett wins][screenshot.png]
+![hammett wins](screenshot.png)
