@@ -1,1 +1,3 @@
 termgraph
+pytest
+hammett
