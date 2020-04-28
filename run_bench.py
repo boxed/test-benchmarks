@@ -1,4 +1,5 @@
 import os
+from math import nan
 from subprocess import run, DEVNULL
 import sys
 from datetime import datetime
@@ -27,6 +28,7 @@ def run_bench(runner):
     for bench in benchmarks:
         if bench in unsupported[runner]:
             print(runner, 'MISSING FEATURE', bench)
+            results[bench][runner] = 0
             continue
         os.chdir(orig_dir)
         runner_specific = f'{bench}__{runner}'
