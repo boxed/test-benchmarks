@@ -9,17 +9,33 @@ benchmarks = [x for x in os.listdir() if x.startswith('bench_')]
 orig_dir = os.getcwd()
 
 runners = [
-    'hammett',
     'pytest',
+    'nose2',
+    'hammett',
 ]
+
+unsupported = {
+    'hammett': set(),
+    'pytest': set(),
+    'nose2': {'bench_many_folders'},
+}
 
 results = defaultdict(lambda: defaultdict(dict))
 
 
 def run_bench(runner):
     for bench in benchmarks:
+        if bench in unsupported[runner]:
+            print(runner, 'MISSING FEATURE', bench)
+            continue
         os.chdir(orig_dir)
-        os.chdir(bench)
+        runner_specific = f'{bench}__{runner}'
+
+        bench_dir = bench
+        if os.path.exists(runner_specific):
+            bench_dir = runner_specific
+
+        os.chdir(bench_dir)
         print(runner, bench)
         start = datetime.now()
         run([sys.executable, '-m', runner], stdout=DEVNULL, stderr=DEVNULL)
@@ -45,7 +61,7 @@ data = [
 args = {
     'filename': 'data/ex1.dat',
     'title': None,
-    'width': 50,
+    'width': 10,
     'format': '{} ms',
     'suffix': '',
     'no_labels': False,
@@ -62,6 +78,6 @@ args = {
 }
 labels = list(results.keys())
 
-colors = [94, 91, 0]
+colors = [91, 94, 92]
 print_categories(runners, colors)
 chart(colors, data, args, labels)
