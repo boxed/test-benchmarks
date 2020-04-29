@@ -1,5 +1,4 @@
 import os
-from math import nan
 from subprocess import run, DEVNULL
 import sys
 from datetime import datetime
