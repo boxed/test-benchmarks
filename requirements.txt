@@ -1,3 +1,4 @@
 termgraph
 pytest
 hammett
+nose2

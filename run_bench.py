@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 from collections import defaultdict
 
-benchmarks = [x for x in os.listdir() if x.startswith('bench_')]
+benchmarks = [x for x in os.listdir() if x.startswith('bench_') and '__' not in x]
 
 orig_dir = os.getcwd()
 
