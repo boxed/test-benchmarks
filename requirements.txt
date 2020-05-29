@@ -1,4 +1,4 @@
-termgraph
+colorama
 pytest
 hammett
 nose2

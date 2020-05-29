@@ -4,23 +4,33 @@ import sys
 from datetime import datetime
 from collections import defaultdict
 
+import colorama
+
 benchmarks = [x for x in os.listdir() if x.startswith('bench_') and '__' not in x]
 
 orig_dir = os.getcwd()
 
-runners = [
-    'pytest',
-    'nose2',
-    'hammett',
-]
+runners = {
+    'pytest': colorama.Fore.RED,
+    'ward': colorama.Fore.YELLOW,
+    'nose2': colorama.Fore.CYAN,
+    'hammett': colorama.Fore.GREEN,
+}
 
 unsupported = {
     'hammett': set(),
     'pytest': set(),
+    'ward': set(),
     'nose2': {'bench_many_folders'},
 }
 
 results = defaultdict(lambda: defaultdict(dict))
+
+# make sure hammett isn't cheating!
+for root, dirs, files in os.walk('.'):
+    for filename in files:
+        if filename == '.hammett-db':
+            os.remove(os.path.join(root, filename))
 
 
 def run_bench(runner):
@@ -47,38 +57,33 @@ print('Running...')
 
 for runner in runners:
     run_bench(runner)
-    run_bench(runner)
 
 
 print()
 
-from termgraph.termgraph import chart, print_categories
+block = '▇'
 
+for runner, color in runners.items():
+    print(f'{color}{block}{colorama.Style.RESET_ALL} {runner}')
 
-data = [
-    list(x.values())
-    for x in results.values()
-]
-args = {
-    'filename': 'data/ex1.dat',
-    'title': None,
-    'width': 10,
-    'format': '{} ms',
-    'suffix': '',
-    'no_labels': False,
-    'color': None,
-    'vertical': False,
-    'stacked': False,
-    'different_scale': False,
-    'calendar': False,
-    'start_dt': None,
-    'custom_tick': '',
-    'delim': '',
-    'verbose': False,
-    'version': False
-}
-labels = list(results.keys())
+print()
+print()
 
-colors = [91, 94, 92]
-print_categories(runners, colors)
-chart(colors, data, args, labels)
+terminal_width = os.get_terminal_size()[0]
+
+for bench_name, bench_results in results.items():
+    title = bench_name.replace('bench_', '').replace('_', ' ').capitalize()
+    print(title)
+    print('-' * len(title))
+    print()
+
+    max_width = max(bench_results.values())
+
+    for runner, ms in bench_results.items():
+        width = int(ms / max_width * (terminal_width - len('123456 ms ') - 1))
+        if ms == 0:
+            ms = 'N/A'
+        print(f'{ms:>6} ms {runners[runner]}{block * width}{colorama.Style.RESET_ALL}')
+
+    print()
+    print()

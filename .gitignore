@@ -130,3 +130,4 @@ output/*/index.html
 results/
 .pytest_cache
 coverage.xml
+.hammett-db
