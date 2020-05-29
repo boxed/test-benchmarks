@@ -2,3 +2,4 @@ colorama
 pytest
 hammett
 nose2
+ward
