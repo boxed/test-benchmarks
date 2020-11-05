@@ -1,5 +1,12 @@
 import os
-from subprocess import run, DEVNULL
+from io import StringIO
+from subprocess import (
+    CalledProcessError,
+    check_output,
+    PIPE,
+    run,
+    DEVNULL,
+)
 import sys
 from datetime import datetime
 from collections import defaultdict
@@ -7,6 +14,16 @@ from collections import defaultdict
 import colorama
 
 benchmarks = [x for x in os.listdir() if x.startswith('bench_') and '__' not in x]
+
+selected_benchmarks = sys.argv[1:]
+
+if sys.argv[1:]:
+    for x in selected_benchmarks:
+        if x not in benchmarks:
+            print(f'{x} not in available benchmarks. Valid values are: {benchmarks}')
+            exit(1)
+
+    benchmarks = selected_benchmarks
 
 orig_dir = os.getcwd()
 
@@ -49,7 +66,19 @@ def run_bench(runner):
         os.chdir(bench_dir)
         print(runner, bench)
         start = datetime.now()
-        run([sys.executable, '-m', runner], stdout=DEVNULL, stderr=DEVNULL)
+        r = run([sys.executable, '-m', runner], stdout=PIPE, stderr=PIPE)
+        output = r.stderr + b'\n' + r.stdout
+        if 'no_tests' not in bench:
+            # Wards error for no tests found
+            if b'NO_TESTS_FOUND' in output:
+                results[bench][runner] = 0
+                continue
+
+            # nose2s error for no tests found
+            if b'Ran 0 tests' in output:
+                results[bench][runner] = 0
+                continue
+
         results[bench][runner] = int((datetime.now() - start).total_seconds() * 1000)
 
 
