@@ -37,7 +37,7 @@ runners = {
 unsupported = {
     'hammett': set(),
     'pytest': set(),
-    'ward': set(),
+    'ward': {'bench_parametrize_slow_fixture', 'bench_parametrize_slow_session_fixture'},
     'nose2': {'bench_many_folders'},
 }
 
@@ -66,7 +66,13 @@ def run_bench(runner):
         os.chdir(bench_dir)
         print(runner, bench)
         start = datetime.now()
-        r = run([sys.executable, '-m', runner], stdout=PIPE, stderr=PIPE)
+
+        command = [sys.executable, '-m', runner]
+        if runner == 'ward':
+            command.append('--path')
+            command.append('.')
+
+        r = run(command, stdout=PIPE, stderr=PIPE)
         output = r.stderr + b'\n' + r.stdout
         if 'no_tests' not in bench:
             # Wards error for no tests found
